@@ -18,7 +18,7 @@ export default function AuthLayout({
         }}
       />
 
-      <div className="relative z-10 w-full max-w-md space-y-8">
+      <div className="relative z-10 w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="flex justify-center">
           <Logo />

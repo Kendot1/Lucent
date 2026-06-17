@@ -1,15 +1,13 @@
 import { MarketOverviewWidget } from "@/features/landing/components/MarketOverviewWidget";
 import { NewsWidget } from "@/features/landing/components/NewsWidget";
 import { Hero3D } from "@/features/landing/components/Hero3D";
+import { ServicesAccordion } from "@/features/landing/components/ServicesAccordion";
 import Link from "next/link";
 import { Header } from "@/components/shared/Header";
 import {
   ArrowRight,
   BookOpen,
   Layers,
-  BarChart3,
-  Globe,
-  Target,
   TrendingUp,
   Shield,
   Zap,
@@ -17,10 +15,12 @@ import {
   LineChart,
   Mail,
   MapPin,
-  Phone,
-  ChevronRight,
   Users,
   Award,
+  Globe,
+  BarChart3,
+  Target,
+  ChevronRight,
   Sparkles,
 } from "lucide-react";
 
@@ -91,36 +91,6 @@ const features = [
   },
 ];
 
-/* ── SERVICES ── */
-const services = [
-  {
-    title: "Personal Trading Analytics",
-    description: "Get a complete behavioral analytics dashboard tailored to your trading style. Identify patterns in your decision-making and refine your edge over time.",
-    bullets: ["Custom confluence tagging", "Session-based performance breakdown", "Behavioral pattern detection"],
-    icon: BarChart3,
-  },
-  {
-    title: "Market Intelligence",
-    description: "Access real-time global market data from a single command center. Track crypto, forex, indices, and commodities without switching tabs.",
-    bullets: ["TradingView chart integration", "Live ticker tape for 7+ asset classes", "Multi-timeframe analysis"],
-    icon: Globe,
-  },
-  {
-    title: "Data Ownership & Export",
-    description: "Your trading data belongs to you. Export everything to CSV at any time. No vendor lock-in, no hidden fees, no data harvesting.",
-    bullets: ["Full CSV export", "Self-hosted option available", "GDPR compliant architecture"],
-    icon: Shield,
-  },
-];
-
-/* ── STATS ── */
-const stats = [
-  { value: "6", label: "Core Modules" },
-  { value: "Real-time", label: "Market Data" },
-  { value: "100%", label: "Data Ownership" },
-  { value: "Dark", label: "Mode Native" },
-];
-
 
 
 export default function LandingPage() {
@@ -177,19 +147,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════
-          STATS BAR
-          ═══════════════════════════════════════════ */}
-      <section className="relative z-20 w-full border-y border-white/5 bg-[#09090b]/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center py-8 md:py-10">
-              <span className="text-2xl md:text-3xl font-bold text-white tracking-tight">{stat.value}</span>
-              <span className="text-xs text-white/40 mt-1 uppercase tracking-wider font-medium">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ═══════════════════════════════════════════
           PRODUCTS / ASSETS
@@ -337,7 +294,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          SERVICES (COMPACT GRID)
+          SERVICES (INTERACTIVE ACCORDION)
           ═══════════════════════════════════════════ */}
       <section id="services" className="relative z-20 w-full py-16 md:py-24 px-6 bg-white/[0.01]">
         <div className="max-w-6xl mx-auto">
@@ -354,39 +311,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {services.map((service, i) => (
-              <div
-                key={service.title}
-                className="group relative bg-white/[0.02] border border-white/[0.06] rounded-[2rem] p-8 hover:bg-white/[0.04] transition-all duration-500 overflow-hidden flex flex-col"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#6C5CE7]/20 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                
-                <div className="w-12 h-12 rounded-2xl bg-[#6C5CE7]/10 border border-[#6C5CE7]/20 flex items-center justify-center mb-6 text-[#A896FF] group-hover:scale-110 transition-transform duration-500">
-                  <service.icon className="w-6 h-6" />
-                </div>
-                
-                <h3 className="text-xl font-bold text-white tracking-tight mb-3">
-                  {service.title}
-                </h3>
-                
-                <p className="text-sm text-white/40 leading-relaxed mb-8 flex-grow">
-                  {service.description}
-                </p>
-                
-                <ul className="space-y-3">
-                  {service.bullets.map((bullet) => (
-                    <li key={bullet} className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center shrink-0">
-                        <div className="w-1 h-1 rounded-full bg-[#6C5CE7]" />
-                      </div>
-                      <span className="text-white/50 text-xs font-medium">{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          <ServicesAccordion />
         </div>
       </section>
 
@@ -395,24 +320,24 @@ export default function LandingPage() {
           ═══════════════════════════════════════════ */}
       <section id="about" className="relative w-full py-24 md:py-32 px-6 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#6C5CE7]/5 via-transparent to-transparent pointer-events-none" />
-        
+
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            
+
             {/* Story Text */}
             <div className="flex-1 space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-white/60 text-xs font-semibold uppercase tracking-widest">
                 <Users className="w-3 h-3" />
                 The Origin
               </div>
-              
+
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-[1.1]">
                 Trading is hard. <br className="hidden md:block" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C5CE7] to-[#A896FF]">
                   Your tools shouldn't be.
                 </span>
               </h2>
-              
+
               <div className="space-y-6 text-base md:text-lg text-white/40 leading-relaxed font-medium">
                 <p>
                   Lucent was born out of frustration. We were tired of scattered spreadsheets, disconnected charting tools, and journaling platforms that felt like an afterthought.
@@ -427,31 +352,21 @@ export default function LandingPage() {
             <div className="flex-1 w-full max-w-lg mx-auto lg:mx-0">
               <div className="relative w-full aspect-square md:aspect-[4/5] rounded-[2.5rem] border border-white/[0.08] bg-[#09090b] overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#6C5CE7]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-10 pointer-events-none" />
-                
+
                 {/* Generated Abstract Image */}
                 <div className="absolute inset-0 w-full h-full">
-                  <img 
-                    src="/images/about-abstract.png" 
-                    alt="Abstract data core representing trading intelligence"
+                  <img
+                    src="/images/about-trading.png"
+                    alt="Premium 3D abstract candlestick chart"
                     className="w-full h-full object-cover object-center opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-1000 ease-out"
                   />
                 </div>
 
-                {/* Floating Metric Card */}
-                <div className="absolute bottom-8 left-8 right-8 z-20">
-                  <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 shadow-2xl transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white/60 text-xs font-bold uppercase tracking-widest">System</span>
-                      <div className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
-                    </div>
-                    <div className="text-2xl font-bold text-white tracking-tight">
-                      Clarity Achieved
-                    </div>
-                  </div>
-                </div>
+
+
               </div>
             </div>
-            
+
           </div>
         </div>
       </section>
@@ -628,8 +543,16 @@ export default function LandingPage() {
             <div>
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Legal</h4>
               <ul className="space-y-2.5">
-                {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item) => (
-                  <li key={item}><a href="#" className="text-xs text-white/30 hover:text-white transition-colors">{item}</a></li>
+                {[
+                  { name: "Privacy Policy", href: "/legal/privacy" },
+                  { name: "Terms of Service", href: "/legal/terms" },
+                  { name: "Cookie Policy", href: "/legal/cookies" },
+                ].map((item) => (
+                  <li key={item.name}>
+                    <Link href={item.href} className="text-xs text-white/30 hover:text-white transition-colors">
+                      {item.name}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>
