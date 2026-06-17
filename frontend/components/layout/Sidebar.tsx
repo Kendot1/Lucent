@@ -26,10 +26,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Journal", href: "/journal", icon: BookOpen },
-  { label: "Market", href: "/market", icon: Globe },
-  { label: "Confluence", href: "/confluence", icon: Layers },
+  { label: "Market Context", href: "/market", icon: Globe },
+  { label: "Confluence Engine", href: "/confluence", icon: Layers },
   { label: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 

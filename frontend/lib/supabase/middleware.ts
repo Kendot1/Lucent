@@ -37,18 +37,19 @@ export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/signup");
+  const isPublicRoute = pathname === "/" || isAuthRoute;
 
-  // Redirect unauthenticated users to login
-  if (!user && !isAuthRoute) {
+  // Redirect unauthenticated users to login (but allow public routes)
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages to the dashboard
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

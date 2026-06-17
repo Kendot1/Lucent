@@ -1,4 +1,5 @@
 import { Logo } from "@/components/shared/Logo";
+import { Header } from "@/components/shared/Header";
 
 export default function AuthLayout({
   children,
@@ -7,6 +8,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 bg-bg-primary">
+      <Header />
       {/* Subtle background gradient */}
       <div
         className="fixed inset-0 pointer-events-none"
