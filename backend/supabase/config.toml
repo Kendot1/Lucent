@@ -1,0 +1,12 @@
+# A string used to distinguish different Supabase projects on the same host. Defaults to the
+# working directory name when running `supabase init`.
+project_id = "lucent-backend"
+
+[api]
+enabled = true
+# Port to use for the API URL.
+port = 54321
+# Additional configuration goes here...
+
+[functions]
+# Additional configuration goes here...
