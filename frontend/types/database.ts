@@ -41,6 +41,41 @@ export interface Database {
           user_id?: string
         }
       }
+      chart_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          notes: string | null
+          symbol: string
+          timeframe: string | null
+          trade_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          notes?: string | null
+          symbol: string
+          timeframe?: string | null
+          trade_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          notes?: string | null
+          symbol?: string
+          timeframe?: string | null
+          trade_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+      }
       market_snapshots: {
         Row: {
           bias: string | null

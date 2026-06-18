@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Lightbulb } from "lucide-react";
+import { SnapshotSaveModal } from "./SnapshotSaveModal";
 
 export function TradingViewChart() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [symbol, setSymbol] = useState("NASDAQ:NDX");
-  const [inputValue, setInputValue] = useState("NASDAQ:NDX");
+  const [symbol, setSymbol] = useState("NASDAQ:AAPL");
+  const [inputValue, setInputValue] = useState("NASDAQ:AAPL");
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -33,7 +33,7 @@ export function TradingViewChart() {
         "gridColor": "rgba(255, 255, 255, 0.06)",
         "hide_top_toolbar": false,
         "hide_legend": false,
-        "save_image": false,
+        "save_image": true,
         "allow_symbol_change": true,
         "hide_side_toolbar": false,
         "withdateranges": true,
@@ -59,32 +59,27 @@ export function TradingViewChart() {
 
   return (
     <div className="w-full flex flex-col gap-3">
-      {/* Symbol Selector */}
-      <form onSubmit={handleSearch} className="flex items-center gap-2">
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-tertiary" />
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value.toUpperCase())}
-            placeholder="e.g. COINBASE:BTCUSD, AAPL"
-            className="w-full rounded-lg border border-border bg-bg-secondary pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-colors uppercase"
-          />
-        </div>
-        <Button type="submit" size="sm" className="h-9">
-          Load Chart
-        </Button>
-      </form>
-
+      {/* Tip Banner */}
+      <div className="flex items-start gap-3 bg-blue-500/10 border border-blue-500/20 text-blue-200 px-4 py-3 rounded-xl text-sm">
+        <Lightbulb className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+        <p>
+          <strong className="font-semibold text-blue-300">Pro Tip:</strong> Log into your free TradingView account using the chart menu to automatically save your drawings across sessions!
+        </p>
+      </div>
       {/* Chart Container */}
       <div className="w-full h-[calc(100vh-200px)] min-h-[500px] bg-bg-secondary border border-border rounded-xl p-0.5 shadow-sm overflow-hidden">
         <div className="tradingview-widget-container" style={{ height: "100%", width: "100%" }}>
-          <div 
-            className="tradingview-widget-container__widget" 
-            style={{ height: "100%", width: "100%" }} 
-            ref={containerRef} 
+          <div
+            className="tradingview-widget-container__widget"
+            style={{ height: "100%", width: "100%" }}
+            ref={containerRef}
           />
         </div>
+      </div>
+      
+      {/* Action Bar */}
+      <div className="flex items-center justify-end">
+        <SnapshotSaveModal currentSymbol={symbol} />
       </div>
     </div>
   );

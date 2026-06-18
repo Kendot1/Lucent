@@ -12,9 +12,11 @@ const SESSIONS = [
 ];
 
 export function SessionClock() {
+  const [mounted, setMounted] = useState(false);
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -28,8 +30,8 @@ export function SessionClock() {
           <Clock className="w-5 h-5 text-accent" />
           <h3 className="font-semibold text-text-primary">Market Sessions</h3>
         </div>
-        <div className="text-sm font-mono text-text-secondary bg-bg-tertiary px-3 py-1 rounded-md">
-          {time.toLocaleTimeString('en-US', { timeZoneName: 'short' })}
+        <div className="text-sm font-mono text-text-secondary bg-bg-tertiary px-3 py-1 rounded-md min-w-[120px] text-center">
+          {mounted ? time.toLocaleTimeString('en-US', { timeZoneName: 'short' }) : "Loading..."}
         </div>
       </div>
 
@@ -68,12 +70,14 @@ export function SessionClock() {
         })}
 
         {/* Current Time Indicator */}
-        <div
-          className="absolute top-0 bottom-0 w-0.5 bg-accent z-20 shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-1000 ease-linear"
-          style={{ left: `${(currentHourUTC / 24) * 100}%` }}
-        >
-          <div className="absolute -top-1 -translate-x-1/2 w-2 h-2 rounded-full bg-accent" />
-        </div>
+        {mounted && (
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-accent z-20 shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-1000 ease-linear"
+            style={{ left: `${(currentHourUTC / 24) * 100}%` }}
+          >
+            <div className="absolute -top-1 -translate-x-1/2 w-2 h-2 rounded-full bg-accent" />
+          </div>
+        )}
       </div>
       
       <div className="flex justify-between mt-2 px-1 text-[10px] text-text-tertiary uppercase tracking-wider font-mono">

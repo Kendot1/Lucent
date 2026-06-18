@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/shared/EmptyState";
 import { MarketTicker } from "@/features/market/components/MarketTicker";
 import { SessionClock } from "@/features/market/components/SessionClock";
 import { TradingViewChart } from "@/features/market/components/TradingViewChart";
+import { SnapshotGallery } from "@/features/market/components/SnapshotGallery";
 
 export default function MarketPage() {
   return (
@@ -15,14 +16,7 @@ export default function MarketPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <SessionClock />
-          
-          <div className="rounded-xl border border-border bg-bg-secondary">
-            <EmptyState
-              icon={Globe}
-              title="Market Snapshots"
-              description="Save market snapshots (volatility, bias, key levels) to link with your trades."
-            />
-          </div>
+          <SnapshotGallery />
         </div>
         
         <div className="lg:col-span-1">

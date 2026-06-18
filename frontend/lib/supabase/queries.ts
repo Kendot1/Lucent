@@ -5,6 +5,7 @@ export type Trade = Database["public"]["Tables"]["trades"]["Row"];
 export type ConfluenceTag = Database["public"]["Tables"]["confluence_tags"]["Row"];
 export type MarketSnapshot = Database["public"]["Tables"]["market_snapshots"]["Row"];
 export type TradeScreenshot = Database["public"]["Tables"]["trade_screenshots"]["Row"];
+export type ChartSnapshot = Database["public"]["Tables"]["chart_snapshots"]["Row"];
 
 export async function getTrades() {
   const supabase = createClient();
@@ -58,6 +59,17 @@ export async function getMarketSnapshots() {
 
   if (error) throw error;
   return data as MarketSnapshot[];
+}
+
+export async function getChartSnapshots() {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("chart_snapshots")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as ChartSnapshot[];
 }
 
 export async function getDashboardStats() {
