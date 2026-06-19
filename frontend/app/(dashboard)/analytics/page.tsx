@@ -3,6 +3,7 @@ import { BarChart2 } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { EquityCurve } from "@/features/analytics/components/EquityCurve";
 import { WinRateChart } from "@/features/analytics/components/WinRateChart";
+import { TradingCalendar } from "@/features/analytics/components/TradingCalendar";
 
 export default async function AnalyticsPage() {
   const trades = await getTrades();
@@ -24,6 +25,11 @@ export default async function AnalyticsPage() {
           </div>
           <div className="lg:col-span-1">
             <WinRateChart trades={trades} />
+          </div>
+          
+          {/* Trading Calendar Spans Full Width */}
+          <div className="lg:col-span-3">
+            <TradingCalendar trades={trades} />
           </div>
         </div>
       )}

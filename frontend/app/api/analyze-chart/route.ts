@@ -30,9 +30,14 @@ export async function POST(request: Request) {
 Please extract:
 1. The trading symbol (e.g., AAPL, BTCUSD)
 2. The timeframe (e.g., 15m, 1h, 1D)
-3. A detailed description of the price action, trends, key support/resistance levels, and any visible indicators.`;
+3. A detailed description of the price action, trends, key support/resistance levels, and any visible indicators.
+4. CRITICAL: Look for a "Long Position" or "Short Position" drawing tool on the chart. 
+   - If present, specify the Setup Type (Long or Short).
+   - Read the Entry Price, Take Profit (TP), and Stop Loss (SL) levels from the tool.
+   - Read the Risk/Reward ratio from the tool.
+   - Look at the current price relative to the tool. Did the price hit the Take Profit (Win)? Did it hit the Stop Loss (Loss)? Or is it still in between (Open)? Determine the outcome.`;
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -77,13 +82,26 @@ Based on this description, your task is to:
 1. Extract the trading symbol. If not explicitly stated, infer it or default to "UNKNOWN".
 2. Extract the timeframe. If not explicitly stated, default to "15m".
 3. Write a brief, punchy technical analysis (max 3 sentences) summarizing the setup.
+4. If a Long or Short position tool was detected, extract its data.
 
 Respond STRICTLY in JSON format with no markdown wrappers or backticks. Do not include any text outside the JSON object. Example:
 {
   "symbol": "BTCUSD",
   "timeframe": "4h",
-  "analysis": "Price is approaching a major resistance level at 65,000. There is a visible bullish divergence on the RSI, suggesting potential for a breakout. A bounce off the 50 EMA provides further confluence for a long setup."
-}`;
+  "analysis": "Price is approaching a major resistance level at 65,000. There is a visible bullish divergence on the RSI, suggesting potential for a breakout. A bounce off the 50 EMA provides further confluence for a long setup.",
+  "trade_setup": {
+    "direction": "long", 
+    "entry_price": 62000.50,
+    "take_profit": 65000.00,
+    "stop_loss": 60500.00,
+    "risk_reward_ratio": 2.0,
+    "outcome": "open" 
+  }
+}
+Note: 
+- "direction" must be "long", "short", or null.
+- "outcome" must be "win", "loss", "breakeven", "open", or null.
+- If no trade setup is detected, omit the "trade_setup" key or set it to null.`;
 
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -100,7 +118,7 @@ Respond STRICTLY in JSON format with no markdown wrappers or backticks. Do not i
           },
         ],
         response_format: { type: "json_object" },
-        temperature: 0.2,
+        temperature: 0.1,
       }),
     });
 

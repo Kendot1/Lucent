@@ -97,7 +97,7 @@ export default async function DashboardPage() {
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* Left Column: Recent Trades */}
         <div className="xl:col-span-2 space-y-4">
           <div className="flex items-center justify-between px-1">
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
               View All
             </Link>
           </div>
-          
+
           {recentTrades.length === 0 ? (
             <div className="rounded-xl border border-border border-dashed bg-bg-secondary p-8 text-center flex flex-col items-center">
               <Activity className="w-6 h-6 text-text-tertiary mb-2" />
@@ -119,7 +119,7 @@ export default async function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {recentTrades.map((trade) => (
-                <TradeCard key={trade.id} trade={trade} onClick={() => {}} />
+                <TradeCard key={trade.id} trade={trade} />
               ))}
             </div>
           )}
@@ -132,38 +132,7 @@ export default async function DashboardPage() {
 
       </div>
 
-      {/* Quick Links */}
-      <div>
-        <h3 className="text-sm font-medium text-text-secondary uppercase tracking-wider mb-4">
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="group rounded-xl border border-border bg-bg-secondary p-5 transition-all duration-200 hover:border-border-hover hover:shadow-md"
-            >
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-                style={{ backgroundColor: link.bgColor }}
-              >
-                <link.icon
-                  className="w-5 h-5"
-                  style={{ color: link.color }}
-                  strokeWidth={1.5}
-                />
-              </div>
-              <h4 className="text-sm font-semibold text-text-primary group-hover:text-accent-text transition-colors">
-                {link.label}
-              </h4>
-              <p className="text-xs text-text-tertiary mt-1">
-                {link.description}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
+
 
       {/* Recent Activity (empty state) */}
       <div>

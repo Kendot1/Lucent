@@ -76,3 +76,28 @@ export async function createTradeAction(formData: FormData) {
 
   return { success: true };
 }
+
+export async function updateTradeAction(tradeId: string, updates: Partial<any>) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  
+  if (authError || !user) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("trades")
+    .update(updates)
+    .eq("id", tradeId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("DB Error on update:", error);
+    return { error: "Failed to update trade" };
+  }
+
+  revalidatePath("/");
+  revalidatePath("/journal");
+  revalidatePath("/analytics");
+  revalidatePath("/market");
+
+  return { success: true };
+}

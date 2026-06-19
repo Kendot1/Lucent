@@ -1,4 +1,5 @@
-import { createClient } from "./client";
+import { unstable_noStore as noStore } from "next/cache";
+import { createClient } from "./server";
 import { Database } from "@/types/database";
 
 export type Trade = Database["public"]["Tables"]["trades"]["Row"];
@@ -8,7 +9,8 @@ export type TradeScreenshot = Database["public"]["Tables"]["trade_screenshots"][
 export type ChartSnapshot = Database["public"]["Tables"]["chart_snapshots"]["Row"];
 
 export async function getTrades() {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("trades")
     .select("*")
@@ -19,7 +21,8 @@ export async function getTrades() {
 }
 
 export async function getTrade(id: string) {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("trades")
     .select(`
@@ -39,7 +42,8 @@ export async function getTrade(id: string) {
 }
 
 export async function getConfluenceTags() {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("confluence_tags")
     .select("*")
@@ -51,7 +55,8 @@ export async function getConfluenceTags() {
 }
 
 export async function getMarketSnapshots() {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("market_snapshots")
     .select("*")
@@ -62,7 +67,8 @@ export async function getMarketSnapshots() {
 }
 
 export async function getChartSnapshots() {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("chart_snapshots")
     .select("*")
@@ -73,7 +79,8 @@ export async function getChartSnapshots() {
 }
 
 export async function getDashboardStats() {
-  const supabase = createClient();
+  noStore();
+  const supabase = await createClient();
   // Fetch only what we need for stats
   const { data, error } = await supabase
     .from("trades")

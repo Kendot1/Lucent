@@ -1,13 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, X, Upload } from "lucide-react";
+import { Camera, X, Upload, Target } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 interface SnapshotSaveModalProps {
   currentSymbol: string;
+}
+
+type TradeOutcome = "win" | "loss" | "breakeven" | "open" | null;
+type TradeDirection = "long" | "short" | null;
+
+interface TradeSetup {
+  direction: TradeDirection;
+  entry_price: number | null;
+  take_profit: number | null;
+  stop_loss: number | null;
+  risk_reward_ratio: number | null;
+  outcome: TradeOutcome;
 }
 
 export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
@@ -19,6 +31,9 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
   const [timeframe, setTimeframe] = useState("15m");
   const [notes, setNotes] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  
+  const [tradeSetup, setTradeSetup] = useState<TradeSetup | null>(null);
+  
   const router = useRouter();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,6 +63,11 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
             if (data.symbol) setSymbol(data.symbol);
             if (data.timeframe) setTimeframe(data.timeframe);
             if (data.analysis) setNotes(data.analysis);
+            if (data.trade_setup && data.trade_setup.direction) {
+              setTradeSetup(data.trade_setup);
+            } else {
+              setTradeSetup(null);
+            }
           } else {
             console.error('Failed to analyze image:', await response.text());
           }
@@ -72,22 +92,52 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Upload image to Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}_${currentSymbol}.${fileExt}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('chart_snapshots')
-        .upload(fileName, file);
+      let tradeId = null;
 
-      if (uploadError) throw uploadError;
+      // Create trade record if setup was detected
+      if (tradeSetup && tradeSetup.direction) {
+        const { data: tradeData, error: tradeError } = await supabase
+          .from('trades')
+          .insert({
+            user_id: user.id,
+            instrument: symbol,
+            direction: tradeSetup.direction,
+            status: tradeSetup.outcome === 'open' ? 'open' : 'closed',
+            outcome: tradeSetup.outcome === 'open' ? null : tradeSetup.outcome,
+            entry_price: tradeSetup.entry_price,
+            take_profit: tradeSetup.take_profit,
+            stop_loss: tradeSetup.stop_loss,
+            risk_reward_ratio: tradeSetup.risk_reward_ratio,
+            setup_type: 'AI Extracted',
+            notes: notes,
+            entry_time: new Date().toISOString()
+          })
+          .select('id')
+          .single();
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('chart_snapshots')
-        .getPublicUrl(fileName);
+        if (tradeError) {
+          console.error("Failed to insert trade:", tradeError);
+        } else {
+          tradeId = tradeData?.id;
+        }
+      }
 
-      // Save to database
+      // Upload image to Cloudflare R2 via our API
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image to R2');
+      }
+
+      const { url: publicUrl } = await uploadResponse.json();
+
+      // Save snapshot to database
       const { error: dbError } = await supabase
         .from('chart_snapshots')
         .insert({
@@ -95,7 +145,8 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
           symbol,
           timeframe,
           notes,
-          image_url: publicUrl
+          image_url: publicUrl,
+          trade_id: tradeId
         });
 
       if (dbError) throw dbError;
@@ -104,6 +155,7 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
       setFile(null);
       setPreviewUrl(null);
       setNotes("");
+      setTradeSetup(null);
       router.refresh();
       
     } catch (error) {
@@ -126,8 +178,8 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
       </Button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-bg-primary border border-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-bg-primary border border-border rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 my-8">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="font-semibold text-text-primary flex items-center gap-2">
                 <Camera className="w-5 h-5 text-accent" />
@@ -201,8 +253,94 @@ export function SnapshotSaveModal({ currentSymbol }: SnapshotSaveModalProps) {
                 )}
               </div>
 
+              {tradeSetup && (
+                <div className="space-y-3 bg-bg-secondary/50 p-3 rounded-lg border border-border">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-text-primary flex items-center gap-1.5">
+                      <Target className="w-4 h-4 text-accent" />
+                      Trade Setup Detected
+                    </h4>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
+                      tradeSetup.outcome === 'win' ? 'bg-green-500/10 text-green-500' :
+                      tradeSetup.outcome === 'loss' ? 'bg-red-500/10 text-red-500' :
+                      tradeSetup.outcome === 'breakeven' ? 'bg-yellow-500/10 text-yellow-500' :
+                      'bg-blue-500/10 text-blue-500'
+                    }`}>
+                      {tradeSetup.outcome || 'open'}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="text-text-secondary text-xs block">Direction</span>
+                      <select
+                        value={tradeSetup.direction || 'long'}
+                        onChange={(e) => setTradeSetup({...tradeSetup, direction: e.target.value as TradeDirection})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent capitalize"
+                      >
+                        <option value="long">Long</option>
+                        <option value="short">Short</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span className="text-text-secondary text-xs block">Outcome</span>
+                      <select
+                        value={tradeSetup.outcome || 'open'}
+                        onChange={(e) => setTradeSetup({...tradeSetup, outcome: e.target.value as TradeOutcome})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent capitalize"
+                      >
+                        <option value="open">Open</option>
+                        <option value="win">Win</option>
+                        <option value="loss">Loss</option>
+                        <option value="breakeven">Breakeven</option>
+                      </select>
+                    </div>
+                    <div>
+                      <span className="text-text-secondary text-xs block">Entry Price</span>
+                      <input 
+                        type="number" 
+                        step="any"
+                        value={tradeSetup.entry_price || ''} 
+                        onChange={(e) => setTradeSetup({...tradeSetup, entry_price: Number(e.target.value)})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-text-secondary text-xs block">Risk/Reward (R:R)</span>
+                      <input 
+                        type="number" 
+                        step="any"
+                        value={tradeSetup.risk_reward_ratio || ''} 
+                        onChange={(e) => setTradeSetup({...tradeSetup, risk_reward_ratio: Number(e.target.value)})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-text-secondary text-xs block">Take Profit</span>
+                      <input 
+                        type="number" 
+                        step="any"
+                        value={tradeSetup.take_profit || ''} 
+                        onChange={(e) => setTradeSetup({...tradeSetup, take_profit: Number(e.target.value)})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                    <div>
+                      <span className="text-text-secondary text-xs block">Stop Loss</span>
+                      <input 
+                        type="number" 
+                        step="any"
+                        value={tradeSetup.stop_loss || ''} 
+                        onChange={(e) => setTradeSetup({...tradeSetup, stop_loss: Number(e.target.value)})}
+                        className="w-full bg-bg-primary border border-border rounded px-2 py-1 mt-1 focus:outline-none focus:border-accent"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-text-secondary">Analysis Notes (Optional)</label>
+                <label className="text-xs font-medium text-text-secondary">Analysis Notes</label>
                 <textarea 
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
